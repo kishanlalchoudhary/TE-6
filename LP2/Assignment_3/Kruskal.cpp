@@ -5,11 +5,15 @@ class Graph
 {
 public:
     map<string, vector<pair<string, int>>> adj;
+    map<string, string> parent;
+    map<string, int> size;
+    vector<pair<int, pair<string, string>>> edges;
 
     void addEdge(string computer1, string computer2, int distance)
     {
         adj[computer1].push_back({computer2, distance});
         adj[computer2].push_back({computer1, distance});
+        edges.push_back({distance, {computer1, computer2}});
     }
 
     void printGraph()
@@ -25,33 +29,57 @@ public:
         }
     }
 
+    string find(string computer)
+    {
+        if (computer == parent[computer])
+        {
+            return computer;
+        }
+        return parent[computer] = find(parent[computer]);
+    }
+
+    void make_union(string computer1, string computer2)
+    {
+        string upc1 = find(computer1);
+        string upc2 = find(computer2);
+
+        if (upc1 == upc2)
+        {
+            return;
+        }
+
+        if (size[upc1] > size[upc2])
+        {
+            parent[upc2] = upc1;
+            size[upc1] += size[upc2];
+        }
+        else
+        {
+            parent[upc1] = upc2;
+            size[upc2] += size[upc1];
+        }
+    }
+
     void kruskal()
     {
-        set<string> visited;
-        priority_queue<pair<int, pair<string, string>>, vector<pair<int, pair<string, string>>>, greater<pair<int, pair<string, string>>>> pq;
         vector<pair<int, pair<string, string>>> mst;
 
         for (auto computer : adj)
         {
-            for (auto neighbour : computer.second)
-            {
-                pq.push({neighbour.second, {computer.first, neighbour.first}});
-            }
+            parent[computer.first] = computer.first;
+            size[computer.first] = 1;
         }
 
-        while (!pq.empty())
-        {
-            pair<int, pair<string, string>> computer = pq.top();
-            pq.pop();
+        sort(edges.begin(), edges.end());
 
-            if (visited.find(computer.second.first) != visited.end() && visited.find(computer.second.second) != visited.end())
+        for (auto edge : edges)
+        {
+            if (find(edge.second.first) == find(edge.second.second))
             {
                 continue;
             }
-
-            mst.push_back(computer);
-            visited.insert(computer.second.first);
-            visited.insert(computer.second.second);
+            mst.push_back(edge);
+            make_union(edge.second.first, edge.second.second);
         }
 
         printMST(mst);
