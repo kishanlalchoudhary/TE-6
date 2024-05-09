@@ -25,6 +25,29 @@ public:
         }
     }
 
+    void BFS(queue<string>& q, set<string>& visited, vector<string>& result)
+    {
+        if(q.empty()){
+            return;
+        }
+
+        string person = q.front();
+        q.pop();
+
+        result.push_back(person);
+
+        for (auto neighbour : adj[person])
+        {
+            if (visited.find(neighbour) == visited.end())
+            {
+                visited.insert(person);
+                q.push(neighbour);
+            }
+        }
+
+        BFS(q, visited, result);
+    }
+
     void BFS_Traversal(string src)
     {
         vector<string> result;
@@ -34,22 +57,7 @@ public:
         visited.insert(src);
         q.push(src);
 
-        while (!q.empty())
-        {
-            string person = q.front();
-            q.pop();
-
-            result.push_back(person);
-
-            for (auto neighbour : adj[person])
-            {
-                if (visited.find(neighbour) == visited.end())
-                {
-                    visited.insert(person);
-                    q.push(neighbour);
-                }
-            }
-        }
+        BFS(q, visited, result);
 
         printResult("BFS", result);
     }
