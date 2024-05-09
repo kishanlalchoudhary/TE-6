@@ -6,18 +6,18 @@ class Graph
 public:
     map<string, vector<string>> adj;
 
-    void addEdge(string person1, string person2)
+    void addEdge(string computer1, string computer2)
     {
-        adj[person1].push_back(person2);
-        adj[person2].push_back(person1);
+        adj[computer1].push_back(computer2);
+        adj[computer2].push_back(computer1);
     }
 
     void printGraph()
     {
-        for (auto person : adj)
+        for (auto computer : adj)
         {
-            cout << person.first << " -> ";
-            for (auto neighbour : person.second)
+            cout << computer.first << " -> ";
+            for (auto neighbour : computer.second)
             {
                 cout << neighbour << " ";
             }
@@ -25,23 +25,24 @@ public:
         }
     }
 
-    void BFS(queue<string>& q, set<string>& visited, vector<string>& result)
+    void BFS(queue<pair<string, int>> &q, set<string> &visited, vector<pair<string, int>> &result)
     {
-        if(q.empty()){
+        if (q.empty())
+        {
             return;
         }
 
-        string person = q.front();
+        pair<string, int> computer = q.front();
         q.pop();
 
-        result.push_back(person);
+        result.push_back(computer);
 
-        for (auto neighbour : adj[person])
+        for (auto neighbour : adj[computer.first])
         {
             if (visited.find(neighbour) == visited.end())
             {
-                visited.insert(person);
-                q.push(neighbour);
+                visited.insert(computer.first);
+                q.push({neighbour, computer.second + 1});
             }
         }
 
@@ -50,48 +51,48 @@ public:
 
     void BFS_Traversal(string src)
     {
-        vector<string> result;
+        vector<pair<string, int>> traversal;
         set<string> visited;
-        queue<string> q;
+        queue<pair<string, int>> q;
 
         visited.insert(src);
-        q.push(src);
+        q.push({src, 0});
 
-        BFS(q, visited, result);
+        BFS(q, visited, traversal);
 
-        printResult("BFS", result);
+        printTraversal("BFS", traversal);
     }
 
-    void DFS(string person, set<string> &visited, vector<string> &result)
+    void DFS(string computer, int level, set<string> &visited, vector<pair<string, int>> &traversal)
     {
-        result.push_back(person);
-        visited.insert(person);
+        traversal.push_back({computer, level});
+        visited.insert(computer);
 
-        for (auto neighbour : adj[person])
+        for (auto neighbour : adj[computer])
         {
             if (visited.find(neighbour) == visited.end())
             {
-                DFS(neighbour, visited, result);
+                DFS(neighbour, level + 1, visited, traversal);
             }
         }
     }
 
-    void DFS_Traversal(string person)
+    void DFS_Traversal(string computer)
     {
-        vector<string> result;
+        vector<pair<string, int>> traversal;
         set<string> visited;
 
-        DFS(person, visited, result);
+        DFS(computer, 0, visited, traversal);
 
-        printResult("DFS", result);
+        printTraversal("DFS", traversal);
     }
 
-    void printResult(string name, vector<string> &traversal)
+    void printTraversal(string name, vector<pair<string, int>> &traversal)
     {
         cout << name << " Traversal -> ";
-        for (auto person : traversal)
+        for (auto computer : traversal)
         {
-            cout << person << " ";
+            cout << "(" << computer.first << ", " << computer.second << ") ";
         }
         cout << endl;
     }
@@ -100,16 +101,27 @@ public:
 int main()
 {
     Graph g;
-    g.addEdge("person1", "person2");
-    g.addEdge("person1", "person3");
-    g.addEdge("person2", "person4");
-    g.addEdge("person3", "person5");
-    g.addEdge("person4", "person6");
+    g.addEdge("computer1", "computer2");
+    g.addEdge("computer1", "computer3");
+    g.addEdge("computer2", "computer4");
+    g.addEdge("computer3", "computer5");
+    g.addEdge("computer4", "computer6");
 
     g.printGraph();
 
-    g.BFS_Traversal("person1");
-    g.DFS_Traversal("person1");
+    g.BFS_Traversal("computer1");
+    g.DFS_Traversal("computer1");
 
     return 0;
 }
+
+// Output :
+
+// computer1 -> computer2 computer3
+// computer2 -> computer1 computer4
+// computer3 -> computer1 computer5
+// computer4 -> computer2 computer6
+// computer5 -> computer3
+// computer6 -> computer4
+// BFS Traversal -> (computer1, 0) (computer2, 1) (computer3, 1) (computer4, 2) (computer5, 2) (computer6, 3)
+// DFS Traversal -> (computer1, 0) (computer2, 1) (computer4, 2) (computer6, 3) (computer3, 1) (computer5, 2)
